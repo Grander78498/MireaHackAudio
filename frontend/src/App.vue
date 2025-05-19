@@ -1,4 +1,6 @@
 <script setup>
+  import Header_1 from './components/Header.vue';
+  import Footer_1 from './components/Footer.vue'
 </script>
 
 <template>
@@ -17,5 +19,6 @@
 }
 main {
   flex: 1;
+  background-color: #FFFFF2;
 }
 </style>

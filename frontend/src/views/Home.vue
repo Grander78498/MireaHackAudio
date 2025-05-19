@@ -3,9 +3,13 @@
 </script>
 
 <template>
-
+<div class="main-div">
+<p>Тест</p>
+</div>
 </template>
 
-<style>
-
+<style scoped>
+.main-div {
+    background-color: #FFFFF2;
+}
 </style>
