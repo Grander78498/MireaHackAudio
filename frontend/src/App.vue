@@ -13,6 +13,10 @@
 </template>
 
 <style>
+* {
+  padding: 0;
+  margin: 0;
+}
 .app {
   display: flex;
   flex-direction: column;
