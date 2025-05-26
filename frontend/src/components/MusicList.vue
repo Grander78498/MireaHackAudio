@@ -1,18 +1,49 @@
 <script>
-
-
 export default {
     data() {
         return {
             musics: [
-            {name: 'Музыка 1', authors: ['Автор11', 'Автор21'], time: "2:02"},
-            {name: 'Музыка 2', authors: ['Автор12', 'Автор22'], time: "9:05"},
-            {name: 'Музыка 3', authors: ['Автор13', 'Автор23'], time: "22:06"},
-            {name: 'Музыка 4', authors: ['Автор14', 'Автор24'], time: "28:04"},
-            {name: 'Музыка 5', authors: ['Автор15', 'Автор25'], time: "10:05"}
-        ]
+                {name: 'Музыка 1', authors: ['Автор11', 'Автор21'], time: "2:02"},
+                {name: 'Музыка 2', authors: ['Автор12', 'Автор22'], time: "9:05"},
+                {name: 'Музыка 3', authors: ['Автор13', 'Автор23'], time: "22:06"},
+                {name: 'Музыка 4', authors: ['Автор14', 'Автор24'], time: "28:04"},
+                {name: 'Музыка 5', authors: ['Автор15', 'Автор25'], time: "10:05"}
+            ],
+            searchQuery: ''
         }
+    },
+    computed: {
+        filteredMusics() {
+            if (!this.searchQuery) return this.musics;
+            
+            const query = this.searchQuery.toLowerCase();
+            return this.musics.filter(music => {
+                const nameMatch = music.name.toLowerCase().includes(query);
+                const authorsMatch = music.authors.some(author => 
+                    author.toLowerCase().includes(query)
+                );
+                return nameMatch || authorsMatch;
+            });
+        }
+    },
+   methods: {
+  search() {
+    if (!this.searchQuery) {
+      this.filteredMusics = [...this.musics];
+      return;
     }
+    
+    const query = this.searchQuery.toLowerCase();
+    this.filteredMusics = this.musics.filter(music => {
+      return music.name.toLowerCase().includes(query) || 
+             music.authors.some(author => author.toLowerCase().includes(query));
+    });
+  },
+
+},
+mounted() {
+  this.search(); // инициализация при загрузке
+}
 }
 </script>
 
@@ -21,6 +52,7 @@ export default {
     import MusicPlayer from '../assets/svg/musicPlayer.vue';
     import SeachIcon from '../assets/svg/search.vue';
     import FilterIcon from '../assets/svg/filter.vue';
+    import Filter from './Filter.vue';
 </script>
 
 <template>
@@ -29,14 +61,21 @@ export default {
         <div class="svg1-div">
             <SeachIcon />
         </div>
-        <input placeholder="Введите название песни">
-        <button>Найти</button>
+        <input 
+            v-model="searchQuery" 
+            placeholder="Введите название песни или автора"
+            @input="search"
+        >
+        <button @click="search">Найти</button>
         <div class="svg2-div">
             <FilterIcon />
         </div>
     </div>
+    <div class="music-filter-div-absolute">
+        <Filter />
+    </div>
     <div class="music-list-div">
-        <div class="music-div" v-for="music in this.musics">
+        <div class="music-div" v-for="music in filteredMusics" :key="music.name">
             <div class="img-div">
                 <div class="first-img-rec-div">
                     <div class="second-img-rec-div">
@@ -54,6 +93,9 @@ export default {
                 <p>{{ music.time }}</p>
             </div>
         </div>
+        <div v-if="filteredMusics.length === 0" class="no-results">
+            Ничего не найдено
+        </div>
     </div>
 </div>
 </template>
@@ -70,7 +112,6 @@ export default {
     height: 66px;
     border-radius: 8px;
     background-color: #000;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -82,11 +123,9 @@ export default {
     height: 44px;
     border-radius: 8px;
     background-color: #000;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     z-index: 1;
 }
 
@@ -143,14 +182,12 @@ export default {
     background-color: #482612;
     border-radius: 35px;
     right: 85px;
-
     font-family: Cormorant;
     font-size: 24px;
     font-weight: 400;
     color: #FFF;
-
     position: absolute;
-    
+    cursor: pointer;
 }
 
 .search-div input {
@@ -161,7 +198,6 @@ export default {
     border: 1px solid #000;
     background-color: #FFF;
     padding-left: 65px;
-
     font-family: Cormorant;
     font-size: 24px;
     font-weight: 400;
@@ -180,5 +216,19 @@ export default {
     z-index: 100;
     right: 30px;
     height: 26px;
+}
+
+.no-results {
+    font-family: Cormorant;
+    font-size: 24px;
+    color: #00000080;
+    padding: 20px;
+}
+
+.music-filter-div-absolute {
+    position: absolute;
+    z-index: 100;
+    right: 65px;
+    margin-top: 20px;
 }
 </style>

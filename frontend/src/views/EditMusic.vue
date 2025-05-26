@@ -24,7 +24,7 @@ import strelka from '@/assets/svg/strelka.vue';
             <input>
         </div>
         <div class="edit-button-div">
-            <button>Сохранить</button>
+            <a href="/">Сохранить</a>
         </div>
     </div>
 </div>
@@ -79,7 +79,7 @@ h2 {
     margin-top: 12px;
 }
 
-.edit-button-div button {
+.edit-button-div a {
     width: 284px;
     height: 51px;
     border-radius: 35px;
@@ -96,5 +96,6 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
 }
 </style>
