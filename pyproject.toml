@@ -22,6 +22,7 @@ dependencies = [
     "scipy>=1.15.3",
     "torch>=2.7.0",
     "torchaudio>=2.7.0",
+    "transformers>=4.52.3",
     "whisper-timestamped>=1.15.8",
 ]
 

@@ -1,6 +1,7 @@
 from scipy.io import wavfile
 import demucs.separate
 import os
+from pathlib import Path
 import shutil
 import librosa
 import subprocess
@@ -8,8 +9,8 @@ import numpy as np
 import noisereduce as nr
 from scipy.signal import butter, lfilter, fftconvolve, medfilt
 
-from transcription import get_lyrics
-from tagging import get_tags
+from ml.transcription import get_lyrics
+from ml.tagging import get_tags
 
 """
 Модуль реставрации аудио
@@ -170,7 +171,7 @@ def process(name, seperate=True):
     # Транскрипция
     clean_vocal_path = 'temporary.wav'
     wavfile.write(clean_vocal_path, sr, vocal)
-    lyrics = get_lyrics(os.path.join(os.path.dirname(__file__), "temporary.wav"))  # Слова с тайм-кодами
+    lyrics = get_lyrics(Path().absolute().parent.joinpath("temporary.wav"))  # Слова с тайм-кодами
     text = ''.join(token['word'] for token in lyrics)  # Объединение текста без тайм-кодов
 
     # Тегирование
