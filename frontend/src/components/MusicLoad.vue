@@ -6,65 +6,123 @@ const fileInput = ref(null);
 const audioFile = ref(null);
 const fileName = ref("");
 const audioUrl = ref("");
-const text_file = ref("");
+</script>
 
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
+<script>
+import axios from 'axios';
 
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  if (!file.type.match('audio.*')) {
-    return;
+export default {
+  data() {
+    return {
+      file: null,
+      file_name: '',
+      author: '',
+      performer: '',
+      year: '',
+      isLoading: false,
+      audioUrl: '',
+    }
+  },
+  methods: {
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (!file.type.match('audio.*')) {
+        alert('Пожалуйста, выберите аудиофайл');
+        return;
+      }
+      
+      this.file = file;
+      this.file_name = file.name;
+      this.audioUrl = URL.createObjectURL(file);
+    },
+    async uploadMusic() {
+      if (!this.file) {
+        alert('Пожалуйста, выберите аудиофайл');
+        return;
+      }
+
+      this.isLoading = true;
+      
+      const formData = new FormData();
+      formData.append('audio', this.file);
+      formData.append('author', this.author);
+      formData.append('performer', this.performer);
+      formData.append('year', this.year);
+      
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        // Обработка успешной загрузки
+        alert('Музыка успешно загружена!');
+        this.resetForm();
+        
+      } catch (error) {
+        console.error('Ошибка загрузки:', error);
+        alert('Произошла ошибка при загрузке');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    resetForm() {
+      this.file = null;
+      this.file_name = '';
+      this.author = '';
+      this.performer = '';
+      this.year = '';
+      this.$refs.fileInput.value = '';
+    }
   }
-  
-  audioFile.value = file;
-  fileName.value = file.name;
-  text_file.value = file.name;
-  audioUrl.value = URL.createObjectURL(file);
-};
-
-const removeFile = () => {
-  audioFile.value = null;
-  fileName.value = "";
-  text_file.value = "";
-  audioUrl.value = "";
-  fileInput.value.value = "";
-};
+}
 </script>
 
 <template>
   <div class="main-music-load-div">
     <div class="audio-load-div">
       <h2>Загрузите аудио</h2>
-      <input type="file" ref="fileInput"accept="audio/*"@change="handleFileUpload"class="hidden-input">
+      <input 
+        type="file" 
+        ref="fileInput"
+        accept="audio/*"
+        @change="handleFileUpload"
+        class="hidden-input"
+      >
       <div class="music-load-div" @click="triggerFileInput">
         <div class="upload-div">
           <Skrepka />
-          <p>{{ text_file || "Загрузите файл" }}</p>
-          <button class="select-btn"></button>
+          <p v-if="!file_name">Загрузите файл</p>
+          <p v-else>{{ file_name }}</p>
         </div>
       </div>
     </div>
     
     <div class="text-input-div">
       <h2>Автор</h2>
-      <input>
+      <input v-model="author" placeholder="Введите автора">
     </div>
     
     <div class="text-input-div">
       <h2>Исполнитель</h2>
-      <input>
+      <input v-model="performer" placeholder="Введите исполнителя">
     </div>
     
     <div class="text-input-div">
       <h2>Год</h2>
-      <input type="number">
+      <input type="number" v-model="year" placeholder="Введите год">
     </div>
+    
     <div class="button-div">
-        <a href="/rebuildmusic">Загрузить запись</a>
+      <button @click="uploadMusic" :disabled="isLoading">
+        {{ isLoading ? 'Загрузка...' : 'Загрузить запись' }}
+      </button>
     </div>
   </div>
 </template>
@@ -183,6 +241,27 @@ const removeFile = () => {
 .button-div {
     margin-top: 60px;
     cursor: pointer;
+}
+
+.button-div button {
+  width: 285px;
+  height: 50px;
+  border-radius: 35px;
+  background-color: #482612;
+  border: none;
+  color: #fff;
+  font-family: Cormorant;
+  font-size: 24px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-div button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 </style>

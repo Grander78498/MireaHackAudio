@@ -1,20 +1,20 @@
 <script setup>
-import { ref } from 'vue';
-import cross from '@/assets/svg/cross.vue';
-import strelka2 from '@/assets/svg/strelka2.vue';
-import AuthorList from './Lists/AuthorList.vue';
-import PerformersList from './Lists/PerformersList.vue';
+import { ref } from 'vue'
+import cross from '@/assets/svg/cross.vue'
+import strelka2 from '@/assets/svg/strelka2.vue'
+import AuthorList from './Lists/AuthorList.vue'
+import PerformersList from './Lists/PerformersList.vue'
 
 const emit = defineEmits(['close'])
 
-const showAuthors = ref(false);
-const showPerformers = ref(false);
+const showAuthors = ref(false)
+const showPerformers = ref(false)
 
-function toggleList(listName) {
+const toggleList = (listName) => {
   if (listName === 'authors') {
-    showAuthors.value = !showAuthors.value;
-  } else if (listName === 'performers') {
-    showPerformers.value = !showPerformers.value;
+    showAuthors.value = !showAuthors.value
+  } else {
+    showPerformers.value = !showPerformers.value
   }
 }
 </script>
@@ -23,10 +23,9 @@ function toggleList(listName) {
   <div class="filter-main-div">
     <div class="header-div">
       <h1>Фильтр</h1>
-      <cross @click="emit('close')" />
+      <cross @click="emit('close')" style="cursor: pointer;" />
     </div>
 
-    <!-- Автор -->
     <div class="filter-select-div">
       <h2>Автор</h2>
       <div class="select-input-div">
@@ -49,7 +48,6 @@ function toggleList(listName) {
       </transition>
     </div>
 
-    <!-- Исполнитель -->
     <div class="filter-select-div">
       <h2>Исполнитель</h2>
       <div class="select-input-div">
@@ -72,7 +70,6 @@ function toggleList(listName) {
       </transition>
     </div>
 
-    <!-- Год -->
     <div class="filter-year-div">
       <h2>Год</h2>
       <input>
