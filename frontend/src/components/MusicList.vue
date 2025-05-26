@@ -1,58 +1,34 @@
-<script>
-export default {
-    data() {
-        return {
-            musics: [
-                {name: 'Музыка 1', authors: ['Автор11', 'Автор21'], time: "2:02"},
-                {name: 'Музыка 2', authors: ['Автор12', 'Автор22'], time: "9:05"},
-                {name: 'Музыка 3', authors: ['Автор13', 'Автор23'], time: "22:06"},
-                {name: 'Музыка 4', authors: ['Автор14', 'Автор24'], time: "28:04"},
-                {name: 'Музыка 5', authors: ['Автор15', 'Автор25'], time: "10:05"}
-            ],
-            searchQuery: ''
-        }
-    },
-    computed: {
-        filteredMusics() {
-            if (!this.searchQuery) return this.musics;
-            
-            const query = this.searchQuery.toLowerCase();
-            return this.musics.filter(music => {
-                const nameMatch = music.name.toLowerCase().includes(query);
-                const authorsMatch = music.authors.some(author => 
-                    author.toLowerCase().includes(query)
-                );
-                return nameMatch || authorsMatch;
-            });
-        }
-    },
-   methods: {
-  search() {
-    if (!this.searchQuery) {
-      this.filteredMusics = [...this.musics];
-      return;
-    }
-    
-    const query = this.searchQuery.toLowerCase();
-    this.filteredMusics = this.musics.filter(music => {
-      return music.name.toLowerCase().includes(query) || 
-             music.authors.some(author => author.toLowerCase().includes(query));
-    });
-  },
-
-},
-mounted() {
-  this.search(); // инициализация при загрузке
-}
-}
-</script>
-
 <script setup>
-    import MiniMusicPlayer from '../assets/svg/miniMusicPlayer.vue';
-    import MusicPlayer from '../assets/svg/musicPlayer.vue';
-    import SeachIcon from '../assets/svg/search.vue';
-    import FilterIcon from '../assets/svg/filter.vue';
-    import Filter from './Filter.vue';
+import { ref, computed } from 'vue'
+import MiniMusicPlayer from '../assets/svg/miniMusicPlayer.vue'
+import SeachIcon from '../assets/svg/search.vue'
+import FilterIcon from '../assets/svg/filter.vue'
+import Filter from './Filter.vue'
+
+const showFilter = ref(false)
+const searchQuery = ref('')
+
+const musics = [
+  {name: 'Музыка 1', authors: ['Автор11', 'Автор21'], time: "2:02"},
+  {name: 'Музыка 2', authors: ['Автор12', 'Автор22'], time: "9:05"},
+  {name: 'Музыка 3', authors: ['Автор13', 'Автор23'], time: "22:06"},
+  {name: 'Музыка 4', authors: ['Автор14', 'Автор24'], time: "28:04"},
+  {name: 'Музыка 5', authors: ['Автор15', 'Автор25'], time: "10:05"}
+]
+
+const filteredMusics = computed(() => {
+  if (!searchQuery.value) return musics
+  
+  const query = searchQuery.value.toLowerCase()
+  return musics.filter(music => {
+    return music.name.toLowerCase().includes(query) || 
+           music.authors.some(author => author.toLowerCase().includes(query))
+  })
+})
+
+const toggleFilter = () => {
+  showFilter.value = !showFilter.value
+}
 </script>
 
 <template>
@@ -64,16 +40,19 @@ mounted() {
         <input 
             v-model="searchQuery" 
             placeholder="Введите название песни или автора"
-            @input="search"
         >
         <button @click="search">Найти</button>
-        <div class="svg2-div">
+        <div class="svg2-div" @click="toggleFilter">
             <FilterIcon />
         </div>
     </div>
-    <div class="music-filter-div-absolute">
-        <Filter />
-    </div>
+    
+    <Filter 
+      v-if="showFilter" 
+      @close="showFilter = false" 
+      class="music-filter-div-absolute"
+    />
+    
     <div class="music-list-div">
         <div class="music-div" v-for="music in filteredMusics" :key="music.name">
             <div class="img-div">
