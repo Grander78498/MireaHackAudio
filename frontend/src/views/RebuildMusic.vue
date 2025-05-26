@@ -24,7 +24,7 @@
                 <MusicInfo />
             </div>
             <div class="rebuild-music-button-div">
-                <button class="save-button">Сохранить</button>
+                <a class="save-button" href="/editmusic">Сохранить</a>
                 <button class="change-button">Редактировать</button>
             </div>
         </div>
@@ -94,6 +94,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.rebuild-music-button-div a {
+    width: 284px;
+    height: 51px;
+    border-radius: 35px;
+
+    font-family: Cormorant;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 .save-button {

@@ -12,7 +12,7 @@ import MusicList from '@/components/MusicList.vue';
 </div>
 </template>
 
-<style scoped>
+<style>
 .main-div {
     background-color: #FFFFF2;
 }

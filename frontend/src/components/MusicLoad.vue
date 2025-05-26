@@ -64,7 +64,7 @@ const removeFile = () => {
       <input type="number">
     </div>
     <div class="button-div">
-        <button>Загрузить запись</button>
+        <a href="/rebuildmusic">Загрузить запись</a>
     </div>
   </div>
 </template>
@@ -163,7 +163,7 @@ const removeFile = () => {
   font-size: 20px;
 }
 
-.button-div button {
+.button-div a {
     width: 285px;
     height: 50px;
     border-radius: 35px;
@@ -174,6 +174,10 @@ const removeFile = () => {
     font-size: 24px;
     font-weight: 400;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 .button-div {

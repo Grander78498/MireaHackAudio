@@ -11,8 +11,8 @@
         <p>Сервис реставрации</p>
         <p>любимых сердцу песен</p>
     </div>
-    <div class="button-div">
-        <button>Загрузить запись</button>
+    <div class="load-music-button-div">
+        <a href="/musicload">Загрузить запись</a>
     </div>
     <div class="music-player-div">
         <MusicPlayer />
@@ -51,7 +51,7 @@ p {
     margin-left: 76px;
 }
 
-button {
+.load-music-button-div a {
     width: 340px;
     height: 60px;
     border-radius: 35px;
@@ -61,9 +61,14 @@ button {
     font-size: 32px;
     font-weight: 400;
     color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+
 }
 
-.button-div {
+.load-music-button-div {
     margin-top: 100px;
     margin-left: 76px;
 }
