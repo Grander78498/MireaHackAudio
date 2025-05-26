@@ -4,13 +4,20 @@ from bson import ObjectId
 import aioboto3
 from fastapi import FastAPI, Depends, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic.functional_validators import BeforeValidator
 from pymongo import AsyncMongoClient
+from opensearchpy import AsyncOpenSearch
 
-from dependencies import get_mongo_client, get_s3_client, settings
+from dependencies import get_mongo_client, get_s3_client, get_opensearch_client, settings
+
+# from ml.restavration import process
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+)
 
 
 @app.post('/')
@@ -31,4 +38,9 @@ async def save_to_mongo(author: str, text: str,
         'text': text,
     }
     inserted_id = (await tags.insert_one(tag)).inserted_id
-    return inserted_id
+    return str(inserted_id)
+
+
+@app.post('/search')
+async def search_text(text: str, client: Annotated[AsyncOpenSearch, Depends(get_opensearch_client)]) -> Any:
+    return await client.info()

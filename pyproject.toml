@@ -3,16 +3,36 @@ name = "mirea-hack-audio"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=14.3.0",
     "celery>=5.5.2",
+    "demucs==4.0.1",
     "fastapi[standard]>=0.115.12",
-    "opensearch-py>=2.8.0",
+    "librosa>=0.11.0",
+    "noisereduce>=3.0.3",
+    "opensearch-py[async]>=2.8.0",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.9.1",
     "pyjwt>=2.10.1",
     "pymongo>=4.12.1",
     "python-multipart>=0.0.20",
     "redis>=6.1.0",
+    "scipy>=1.15.3",
+    "torch>=2.7.0",
+    "torchaudio>=2.7.0",
+    "whisper-timestamped>=1.15.8",
 ]
+
+[tool.uv.sources]
+torch = [
+    { index = 'pytorch-cu128' }
+]
+torchaudio = [
+    { index = 'pytorch-cu128' }
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
