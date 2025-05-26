@@ -49,7 +49,7 @@ export default {
       this.isLoading = true;
       
       const formData = new FormData();
-      formData.append('audio', this.file);
+      formData.append('file', this.file);
       formData.append('author', this.author);
       formData.append('performer', this.performer);
       formData.append('year', this.year);

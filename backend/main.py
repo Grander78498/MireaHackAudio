@@ -3,7 +3,7 @@ from bson import ObjectId
 
 import aioboto3
 import aiofiles
-from fastapi import FastAPI, Depends, UploadFile, BackgroundTasks
+from fastapi import FastAPI, Depends, UploadFile, BackgroundTasks, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import AsyncMongoClient
@@ -31,11 +31,12 @@ async def main(file: UploadFile, s3: Annotated[aioboto3.Session, Depends(get_s3_
 
 
 @app.post('/save')
-async def save_to_mongo(file: UploadFile, author: str, performer: str,
+async def save_to_mongo(file: UploadFile,
                         mongo_client: Annotated[AsyncMongoClient, Depends(get_mongo_client)],
                         s3_client: Annotated[aioboto3.Session, Depends(get_s3_client)],
                         background_tasks: BackgroundTasks,
-                        year: int | None = None) -> Any:
+                        author: str = Form(...), performer: str = Form(...),
+                        year: int | None = Form(default=None)) -> Any:
 
     db = mongo_client['db-audio']
     audio_table = db.audio

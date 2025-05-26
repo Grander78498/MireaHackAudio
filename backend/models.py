@@ -25,6 +25,12 @@ class Audio(MongoObject):
     year: int | None = None
 
 
+class SaveAudio(BaseModel):
+    author: str
+    performer: str
+    year: int | None = None
+
+
 class ListAudio(BaseModel):
     result: list[Audio]
 
