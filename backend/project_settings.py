@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSett
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=Path().absolute().parent.as_posix() + '/.env', env_file_encoding='utf-8')
+    model_config = SettingsConfigDict(env_file=Path().absolute().as_posix() + '/.env', env_file_encoding='utf-8')
 
     @classmethod
     def settings_customise_sources(

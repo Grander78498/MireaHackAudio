@@ -1,0 +1,28 @@
+services:
+  frontend:
+    image: frontend
+    build: ./frontend
+    command: npm run dev
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: python_fastapi
+    build: ./backend
+    command: fastapi dev main.py
+    expose: 
+      - 8000
+
+  redis:
+    image: redis
+
+  celery:
+    image: python_fastapi
+    pull_policy: never
+    command: celery -A tasks worker --loglevel=info
+
+    depends_on:
+      - backend
+      - redis

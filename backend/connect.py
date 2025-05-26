@@ -1,2 +1,0 @@
-from opensearchpy import OpenSearch
-

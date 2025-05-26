@@ -9,6 +9,7 @@ dependencies = [
     "celery>=5.5.2",
     "demucs==4.0.1",
     "fastapi[standard]>=0.115.12",
+    "gevent>=25.5.1",
     "librosa>=0.11.0",
     "noisereduce>=3.0.3",
     "opensearch-py[async]>=2.8.0",

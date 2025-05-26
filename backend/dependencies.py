@@ -50,7 +50,6 @@ async def get_opensearch_client():
     USER = settings.search_user
     HOSTS = [settings.search_host]
     PASSWORD = settings.search_password
-    print(HOSTS)
 
     async with AsyncOpenSearch(
         HOSTS,
