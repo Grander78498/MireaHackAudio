@@ -10,6 +10,7 @@ const audioUrl = ref("");
 
 <script>
 import axios from 'axios';
+import { musicIndexStore } from '@/stores/store';
 
 export default {
   data() {
@@ -60,6 +61,11 @@ export default {
             'Content-Type': 'multipart/form-data'
           }
         });
+
+        if (response.data && response.data.id) {
+          musicIndexStore.setMusicIndex(response.data.id.toString())
+          console.log("id получен")
+        }
         
         // Обработка успешной загрузки
         alert('Музыка успешно загружена!');

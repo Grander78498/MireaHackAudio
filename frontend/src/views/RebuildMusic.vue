@@ -5,7 +5,11 @@
 </script>
 
 <script>
+import { musicIndexStore } from '@/stores/store';
+import { storeToRefs } from 'pinia';
 
+const indexStore = musicIndexStore()
+const { index } = storeToRefs(musicIndexStore)
 </script>
 
 <template>
