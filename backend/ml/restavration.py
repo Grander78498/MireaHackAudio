@@ -17,6 +17,7 @@ from ml.tagging import get_tags
 """
 
 
+
 def separate(name):
     """
     Разделение аудиофайла на вокал и музыку с помощью модели Demucs.
@@ -141,7 +142,7 @@ def mix(music, vocal):
     return mix
 
 
-def process(name, seperate=True):
+def process(name, to_separate=True):
     """
     Полный цикл обработки аудиофайла: реставрации,
     транскрипции и тегирования
@@ -154,7 +155,7 @@ def process(name, seperate=True):
 
     # Обработка аудио
     vocal_path, music_path = name, name
-    if seperate:
+    if to_separate:
         vocal_path, music_path = separate(name)
     vocal, sr = vocal_processing(vocal_path)
     music = music_processing(music_path)
@@ -171,7 +172,7 @@ def process(name, seperate=True):
     # Транскрипция
     clean_vocal_path = 'temporary.wav'
     wavfile.write(clean_vocal_path, sr, vocal)
-    lyrics = get_lyrics(Path().absolute().parent.joinpath("temporary.wav"))  # Слова с тайм-кодами
+    lyrics = get_lyrics(Path().absolute().joinpath("temporary.wav").as_posix())  # Слова с тайм-кодами
     text = ''.join(token['word'] for token in lyrics)  # Объединение текста без тайм-кодов
 
     # Тегирование

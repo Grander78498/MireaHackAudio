@@ -3,6 +3,7 @@ from bson import ObjectId
 from typing import Annotated
 
 from pydantic import BaseModel, Field, BeforeValidator, ConfigDict
+from fastapi import Form
 
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
@@ -26,9 +27,9 @@ class Audio(MongoObject):
 
 
 class SaveAudio(BaseModel):
-    author: str
-    performer: str
-    year: int | None = None
+    author: str = Form()
+    performer: str = Form()
+    year: int | None = Form(default=None)
 
 
 class ListAudio(BaseModel):

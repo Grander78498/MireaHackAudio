@@ -11,10 +11,8 @@ from opensearchpy import AsyncOpenSearch
 
 from dependencies import get_mongo_client, get_s3_client, get_opensearch_client, settings
 from models import Audio, ListAudio, ListAuthor, ListPerformer
-from tasks import test, save_file
 
-# from ml.restavration import process
-
+from tasks import save_file
 
 app = FastAPI()
 app.add_middleware(
@@ -30,26 +28,27 @@ async def main(file: UploadFile, s3: Annotated[aioboto3.Session, Depends(get_s3_
     print(response)
 
 
+
 @app.post('/save')
 async def save_to_mongo(file: UploadFile,
                         mongo_client: Annotated[AsyncMongoClient, Depends(get_mongo_client)],
                         s3_client: Annotated[aioboto3.Session, Depends(get_s3_client)],
                         background_tasks: BackgroundTasks,
-                        author: str = Form(...), performer: str = Form(...),
+                        author: str = Form(), performer: str = Form(),
                         year: int | None = Form(default=None)) -> Any:
 
     db = mongo_client['db-audio']
     audio_table = db.audio
-    audio = Audio(original_file_name=file.filename, 
-                  author=author, 
-                  performer=performer, 
+    audio = Audio(original_file_name=file.filename,
+                  author=author,
+                  performer=performer,
                   year=year)
     inserted_id = (await audio_table.insert_one(audio.model_dump())).inserted_id
     async with aiofiles.open(file.filename, 'wb') as out_file:
         content = await file.read()
         await out_file.write(content)
     background_tasks.add_task(save_file, file.filename, settings.bucket, file.filename)
-    return str(inserted_id)
+    return JSONResponse({"id": str(inserted_id)})
 
 
 @app.get(

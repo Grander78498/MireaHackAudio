@@ -26,6 +26,9 @@ dependencies = [
     "whisper-timestamped>=1.15.8",
 ]
 
+[tool.uv]
+cache-dir = "./.uv_cache"
+
 [tool.uv.sources]
 torch = [
     { index = 'pytorch-cu128' }

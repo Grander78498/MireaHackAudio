@@ -43,3 +43,5 @@ coverage
 
 *.mp3
 *.wav
+
+*cache*
