@@ -7,14 +7,12 @@ from project_settings import ML_Models
 
 """
 Модуль генерации слов для аудио
+Если не хватает памяти, заменить # model_whisper_name на 'openai/whisper-tiny'
+Если есть возможность использовать на gpu все модели,
+заменить device на # device = "cuda" if torch.cuda.is_available() else "cpu"
 """
 
-# model_name = "dvislobokov/whisper-large-v3-turbo-russian"
-# model_name = "openai/whisper-tiny" # Если не хватает памяти
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# model = whisper_ts.load_model(model_name, device=device)
-
-model = ML_Models().transcription_model
+model_whisper = ML_Models().transcription_model
 
 
 def get_lyrics(vocals_file):
@@ -27,14 +25,15 @@ def get_lyrics(vocals_file):
               'end': ... - секунда конца, float
           }]
     """
-    result = whisper_ts.transcribe(model,
-                                   vocals_file,
-                                   temperature=0.5,
-                                   compression_ratio_threshold=2.4,
-                                   logprob_threshold=-1.0,
-                                   no_speech_threshold=0.6,
-                                   condition_on_previous_text=False,
-                                   language="ru")
+    result = whisper_ts.transcribe(
+        model_whisper,
+        vocals_file,
+        temperature=0.5,
+        compression_ratio_threshold=2.4,
+        logprob_threshold=-1.0,
+        no_speech_threshold=0.6,
+        condition_on_previous_text=False,
+        language="ru")
 
     lyrics = []
     for segment in result['segments']:
