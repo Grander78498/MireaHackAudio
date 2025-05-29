@@ -1,10 +1,14 @@
 from pathlib import Path
 import os
+import logging
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
 import whisper_timestamped as whisper_ts
 from transformers import pipeline
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class Settings(BaseSettings):
@@ -39,25 +43,26 @@ class Settings(BaseSettings):
 
 
 class ML_Models:
-    def __new__(cls, **kwargs):  # type: ignore[no-untyped-def]
+    def __new__(cls, **kwargs):
         if not hasattr(cls, "instance"):
             cls.instance = super(ML_Models, cls).__new__(cls)
         return cls.instance
     
     def __init__(self,
                  device: str = "",
-                 transcription_model_name: str | None = None, 
-                 tagging_model_name: str | None = None):
+                 model_whisper_name: str | None = None, 
+                 model_bert_name: str | None = None):
         
-        if not hasattr(self, "classifier") or not hasattr(self, "transcription_model"):
+        if not hasattr(self, "model_whisper") or not hasattr(self, "model_bert"):
             load_dotenv(Path().absolute().as_posix() + '/.env')
             cache_dir = os.getenv('HF_HOME') \
                         if os.getenv('HF_HOME') is not None \
                         else Path().home().joinpath('.cache').as_posix()
             
-            match (transcription_model_name, tagging_model_name):
-                case (None, None) | (_, None) | (None, _):
-                    raise Exception('Неверно переданы параметры')
-                case (_, _):
-                    self.transcription_model = whisper_ts.load_model(transcription_model_name, device=device, download_root=cache_dir)
-                    self.classifier = pipeline("zero-shot-classification", model=tagging_model_name, device=device, cache_dir=cache_dir)
+            if model_whisper_name is None or model_bert_name is None:
+                raise Exception('Неверно переданы параметры')
+            else:
+                logger.info('Инициализация whisper')
+                self.model_whisper = whisper_ts.load_model(model_whisper_name, device=device, download_root=cache_dir)
+                logger.info('Инициализация bert')
+                self.model_bert = pipeline("zero-shot-classification", model=model_bert_name, device=device, cache_dir=cache_dir)

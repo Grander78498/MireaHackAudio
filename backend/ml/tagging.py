@@ -9,13 +9,7 @@ from project_settings import ML_Models
 заменить device на device = "cuda" if torch.cuda.is_available() else "cpu"
 """
 
-# model = "DeepPavlov/rubert-base-cased"
-# # model = "cointegrated/rubert-tiny2" # Если не хватает памяти
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# classifier = pipeline("zero-shot-classification", model=model, device=device)
-
-classifier = ML_Models().classifier
+model_bert = ML_Models().model_bert
 
 tags = ['Патриотизм', 'Дружба', 'Любовь', 'О Родине', 'Танки', 'Борьба с фашизмом',
         'День победы', 'Свобода', 'Фронт', 'Блокада', 'Сражение', 'Героизм',

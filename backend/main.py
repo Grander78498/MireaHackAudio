@@ -1,5 +1,6 @@
 from typing import Annotated, Any
 from bson import ObjectId
+import logging
 
 import aioboto3
 import aiofiles
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_origins=['*'],
     allow_methods=['*'],
 )
+logging.basicConfig(level=logging.INFO)
 
 
 @app.post('/')

@@ -15,6 +15,7 @@ dependencies = [
     "opensearch-py[async]>=2.8.0",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.9.1",
+    "pydub>=0.25.1",
     "pyjwt>=2.10.1",
     "pymongo>=4.12.1",
     "python-multipart>=0.0.20",

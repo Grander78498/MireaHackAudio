@@ -12,7 +12,7 @@ from project_settings import ML_Models
 заменить device на # device = "cuda" if torch.cuda.is_available() else "cpu"
 """
 
-model_whisper = ML_Models().transcription_model
+model_whisper = ML_Models().model_whisper
 
 
 def get_lyrics(vocals_file):
