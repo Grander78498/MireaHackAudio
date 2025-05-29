@@ -3,12 +3,14 @@ import whisper_timestamped as whisper_ts
 
 """
 Модуль генерации слов для аудио
+Если не хватает памяти, заменить model_whisper_name на 'openai/whisper-tiny'
+Если есть возможность использовать на gpu все модели,
+заменить device на device = "cuda" if torch.cuda.is_available() else "cpu"
 """
 
-model_name = "dvislobokov/whisper-large-v3-turbo-russian"
-# model_name = "openai/whisper-tiny" # Если не хватает памяти
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = whisper_ts.load_model(model_name, device=device)
+model_whisper_name = "dvislobokov/whisper-large-v3-turbo-russian"
+device = "cpu"
+model_whisper = whisper_ts.load_model(model_whisper_name, device=device)
 
 
 def get_lyrics(vocals_file):
@@ -22,7 +24,7 @@ def get_lyrics(vocals_file):
           }]
     """
     result = whisper_ts.transcribe(
-        model,
+        model_whisper,
         vocals_file,
         temperature=0.5,
         compression_ratio_threshold=2.4,

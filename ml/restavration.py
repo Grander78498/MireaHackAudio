@@ -3,17 +3,35 @@ import demucs.separate
 import os
 import shutil
 import librosa
-import subprocess
 import numpy as np
 import noisereduce as nr
 from scipy.signal import butter, lfilter, fftconvolve, medfilt
+from pydub import AudioSegment
+import time
 
-from transcription import get_lyrics
 from tagging import get_tags
+from transcription import get_lyrics
 
 """
 Модуль реставрации аудио
+Модель для сепарации музыки и вокала, demucs, загружается в память последней.
+Если whisper и bert из модулей генерации слов и генерации тегов загружены на gpu,
+но памяти для demucs на gpu не хватает, он загрузится в cpu.
 """
+
+
+def convert_mp3_to_wav(mp3_file, output_dir):
+    """
+    Перевод mp3 файла в формат wav
+    :param mp3_file: Путь до исходного файла
+    :param output_dir: Директория, куда нужно сохранить wav
+    :return: Путь до сохранённого wav
+    """
+
+    audio = AudioSegment.from_mp3(mp3_file)
+    wav_file = os.path.join(output_dir, os.path.splitext(os.path.basename(mp3_file))[0] + '.wav')
+    audio.export(wav_file, format="wav")
+    return wav_file
 
 
 def separate(name):
@@ -23,11 +41,10 @@ def separate(name):
     :param name: Путь к аудиофайлу
     :return: Кортеж путей к полученным файлам вокала и минуса
     """
-
-    demucs.separate.main(["--mp3", "--two-stems", "vocals", "-n", "mdx_extra", name])
+    demucs.separate.main(["--two-stems", "vocals", "-n", "mdx_extra", name])
     file_name = os.path.splitext(os.path.basename(name))[0]
     fold_name = 'separated/mdx_extra/' + file_name + '/'
-    return fold_name + 'vocals.mp3', fold_name + 'no_vocals.mp3'
+    return fold_name + 'vocals.wav', fold_name + 'no_vocals.wav'
 
 
 def apply_eq(y, sr, lowcut=100.0, highcut=8000.0, order=5):
@@ -95,10 +112,10 @@ def median_filtering(audio, kernel_size=5):
 def vocal_processing(vocal_path):
     """
     Обработка вокала
-    :param vocal_path: Путь до mp3 записи вокала
+    :param vocal_path: Путь до wav записи вокала
     :return: numpy array - отфильтрованный вокал, int - частота дискретизации
     """
-    vocal, sr = librosa.load(vocal_path)
+    vocal, sr = librosa.load(vocal_path, sr=None)
     vocal = median_filtering(vocal)
     vocal = nr.reduce_noise(y=vocal, sr=sr)
     vocal = apply_eq(vocal, sr)
@@ -113,16 +130,16 @@ def vocal_processing(vocal_path):
 def music_processing(music_path):
     """
     Обработка музыки
-    :param music_path: Путь до mp3 записи музыки
+    :param music_path: Путь до wav записи музыки
     :return: numpy array - отфильтрованная музыка
     """
-    music, sr = librosa.load(music_path)
+    music, sr = librosa.load(music_path, sr=None)
     music = median_filtering(music)
     music = apply_eq(music, sr, lowcut=300.0, highcut=10000.0)
     music = rms_normalize(music, target_db=-16)
     music = limiter(music)
     music = normalize_audio(music)
-    return music
+    return music, sr
 
 
 def mix(music, vocal):
@@ -140,44 +157,65 @@ def mix(music, vocal):
     return mix
 
 
-def process(name, seperate=True):
+def process(name, separate_vocals=True):
     """
     Полный цикл обработки аудиофайла: реставрации,
     транскрипции и тегирования
     :param name: Абсолютный путь к исходному аудиофайлу
-    :param seperate: Производить ли разделение файла на вокал и музыку при обработке
+    :param separate_vocals: Производить ли разделение файла на вокал и музыку при обработке
     :return: строка - путь до обработанного аудио-файла,
-    строка - слова песни,
+    список словарей - слова песни,
     список строк - теги
     """
+    if not os.path.exists(name):
+        print(f'Файл {name} не найден.')
+        return name, '', []
+
+    if os.path.splitext(os.path.basename(name))[1] == '.mp3':
+        new_name = convert_mp3_to_wav(name, '')
+        os.remove(name)
+        name = new_name
 
     # Обработка аудио
     vocal_path, music_path = name, name
-    if seperate:
+    if separate_vocals:
+        start = time.time()
         vocal_path, music_path = separate(name)
-    vocal, sr = vocal_processing(vocal_path)
-    music = music_processing(music_path)
-    result = mix(music, vocal)
+        end = time.time()
+        print(f'Сепарация заняла {end - start:.2f} секунд')
+    start = time.time()
+    music, sr = music_processing(music_path)
+    if separate_vocals:
+      vocal, sr = vocal_processing(vocal_path)
+      result = mix(music, vocal)
+    else:
+      result = music
+    end = time.time()
+    print(f'Обработка вокала и музыки заняла {end - start:.2f} секунд')
 
     # Сохранение обработанного файла
     directory = os.path.dirname(name)
     filename = os.path.basename(name)
     new_filename = "cleaned_" + filename
     output_path = os.path.abspath(os.path.join(directory, new_filename))
-    wavfile.write('temporary.wav', sr, result)
-    subprocess.run(["ffmpeg", "-i", "temporary.wav", output_path])
+    scaled = np.int16(result * 32767)
+    wavfile.write(output_path, sr, scaled)
 
     # Транскрипция
-    clean_vocal_path = 'temporary.wav'
-    wavfile.write(clean_vocal_path, sr, vocal)
-    lyrics = get_lyrics(os.path.join(os.path.dirname(__file__), "temporary.wav"))  # Слова с тайм-кодами
+    start = time.time()
+    lyrics = get_lyrics(vocal_path)  # Слова с тайм-кодами
     text = ''.join(token['word'] for token in lyrics)  # Объединение текста без тайм-кодов
+    end = time.time()
+    print(f'Транскрипция заняла {end - start:.2f} секунд')
 
     # Тегирование
+    start = time.time()
     tags = get_tags(text)
+    end = time.time()
+    print(f'Тегирование заняло {end - start:.2f} секунд')
 
     # Удаление промежуточных файлов
-    shutil.rmtree('separated/mdx_extra/' + os.path.splitext(os.path.basename(name))[0])
-    os.remove(clean_vocal_path)
+    if separate_vocals:
+        shutil.rmtree('separated/mdx_extra/' + os.path.splitext(os.path.basename(name))[0])
 
     return output_path, lyrics, tags
