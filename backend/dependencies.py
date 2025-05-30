@@ -9,21 +9,18 @@ from project_settings import Settings
 
 
 settings = Settings()
-session = aioboto3.Session()
+session = aioboto3.Session(
+    region_name='ru-central-1',
+    aws_access_key_id=settings.aws_access_key_id,
+    aws_secret_access_key=settings.aws_secret_access_key
+)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
 
-async def get_s3_client():
+def get_s3_session():
     """Получение клиента для обращения к S3."""
-    async with session.client(
-        service_name='s3',
-        endpoint_url='https://storage.yandexcloud.net',
-        region_name='ru-central-1',
-        aws_access_key_id=settings.aws_access_key_id,
-        aws_secret_access_key=settings.aws_secret_access_key
-    ) as s3:
-        yield s3
+    return session
 
 
 async def get_mongo_client():

@@ -219,4 +219,4 @@ def process(name, separate_vocals=True):
     if separate_vocals:
         shutil.rmtree('separated/mdx_extra/' + os.path.splitext(os.path.basename(name))[0])
 
-    return output_path, lyrics, tags
+    return new_filename, lyrics, tags

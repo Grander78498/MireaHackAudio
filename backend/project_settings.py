@@ -7,9 +7,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSett
 import whisper_timestamped as whisper_ts
 from transformers import pipeline
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=Path().absolute().as_posix() +
@@ -62,7 +59,5 @@ class ML_Models:
             if model_whisper_name is None or model_bert_name is None:
                 raise Exception('Неверно переданы параметры')
             else:
-                logger.info('Инициализация whisper')
                 self.model_whisper = whisper_ts.load_model(model_whisper_name, device=device, download_root=cache_dir)
-                logger.info('Инициализация bert')
                 self.model_bert = pipeline("zero-shot-classification", model=model_bert_name, device=device, cache_dir=cache_dir)

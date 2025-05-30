@@ -10,6 +10,13 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  test: { globals: true,
+    setupFiles: ['./test-setup/mock.js'],
+    environment: 'jsdom',
+    deps: {
+      inline: ['@vue']
+    }
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

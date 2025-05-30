@@ -16,6 +16,11 @@ class MongoObject(BaseModel):
         arbitrary_types_allowed=True
     )
 
+class WordTimestamp(BaseModel):
+    word: str
+    start: float
+    end: float
+
 
 class Audio(MongoObject):
     original_file_name: str
@@ -24,12 +29,8 @@ class Audio(MongoObject):
     author: str
     performer: str
     year: int | None = None
-
-
-class SaveAudio(BaseModel):
-    author: str = Form()
-    performer: str = Form()
-    year: int | None = Form(default=None)
+    word_timestamps: list[WordTimestamp] = []
+    is_processed: bool = False
 
 
 class ListAudio(BaseModel):
@@ -42,3 +43,7 @@ class ListAuthor(BaseModel):
 
 class ListPerformer(BaseModel):
     performers: list[str]
+
+
+class FilenameRequest(BaseModel):
+    filename: str

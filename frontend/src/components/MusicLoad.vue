@@ -1,16 +1,85 @@
 <script setup>
 import Skrepka from '@/assets/svg/skrepka.vue';
+import axios from 'axios';
 import { ref } from 'vue';
+import { musicIndexStore } from '@/stores/store';
+import router from '@/router';
 
 const fileInput = ref(null);
+const file = ref(null);
+const author = ref('');
+const performer = ref('');
+const year = ref('');
+const isLoading = ref(false);
 const audioFile = ref(null);
 const fileName = ref("");
-const audioUrl = ref("");
+const store = musicIndexStore();
+
+function triggerFileInput() {
+  fileInput.value.click();
+}
+function handleFileUpload(event) {
+  const inputFile = event.target.files[0];
+  if (!inputFile) return;
+  
+  if (!inputFile.type.match('audio.*')) {
+    alert('Пожалуйста, выберите аудиофайл');
+    return;
+  }
+  
+  file.value = inputFile;
+  fileName.value = inputFile.name;
+}
+async function uploadMusic() {
+  if (!file.value) {
+    alert('Пожалуйста, выберите аудиофайл');
+    return;
+  }
+
+  isLoading.value = true;
+  
+  const formData = new FormData();
+  formData.append('file', file.value);
+  formData.append('author', author.value);
+  formData.append('performer', performer.value);
+  formData.append('year', year.value);
+  
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/save', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.data && response.data.id) {
+      store.setMusicIndex(response.data.id.toString())
+      console.log(`${response.data.id}`)
+    }
+    
+    // Обработка успешной загрузки
+    alert('Музыка успешно загружена!');
+    resetForm();
+
+    router.push({ path: `/rebuildmusic/${response.data.id.toString()}`});
+  } catch (error) {
+    console.error('Ошибка загрузки:', error);
+    alert('Произошла ошибка при загрузке');
+  } finally {
+    isLoading.value = false;
+  }
+}
+function resetForm() {
+  file.value = null;
+  fileName.value = '';
+  author.value = '';
+  performer.value = '';
+  year.value = '';
+  fileInput.value = '';
+}
 </script>
 
-<script>
-import axios from 'axios';
-import { musicIndexStore } from '@/stores/store';
+<!-- <script>
+
 
 export default {
   data() {
@@ -21,63 +90,9 @@ export default {
       performer: '',
       year: '',
       isLoading: false,
-      audioUrl: '',
     }
   },
   methods: {
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      if (!file.type.match('audio.*')) {
-        alert('Пожалуйста, выберите аудиофайл');
-        return;
-      }
-      
-      this.file = file;
-      this.file_name = file.name;
-      this.audioUrl = URL.createObjectURL(file);
-    },
-    async uploadMusic() {
-      if (!this.file) {
-        alert('Пожалуйста, выберите аудиофайл');
-        return;
-      }
-
-      this.isLoading = true;
-      
-      const formData = new FormData();
-      formData.append('file', this.file);
-      formData.append('author', this.author);
-      formData.append('performer', this.performer);
-      formData.append('year', this.year);
-      
-      try {
-        const response = await axios.post('http://127.0.0.1:8000/save', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        if (response.data && response.data.id) {
-          musicIndexStore.setMusicIndex(response.data.id.toString())
-          console.log("id получен")
-        }
-        
-        // Обработка успешной загрузки
-        alert('Музыка успешно загружена!');
-        this.resetForm();
-        
-      } catch (error) {
-        console.error('Ошибка загрузки:', error);
-        alert('Произошла ошибка при загрузке');
-      } finally {
-        this.isLoading = false;
-      }
-    },
     resetForm() {
       this.file = null;
       this.file_name = '';
@@ -88,7 +103,7 @@ export default {
     }
   }
 }
-</script>
+</script> -->
 
 <template>
   <div class="main-music-load-div">
@@ -104,8 +119,8 @@ export default {
       <div class="music-load-div" @click="triggerFileInput">
         <div class="upload-div">
           <Skrepka />
-          <p v-if="!file_name">Загрузите файл</p>
-          <p v-else>{{ file_name }}</p>
+          <p v-if="!fileName">Загрузите файл</p>
+          <p v-else>{{ fileName }}</p>
         </div>
       </div>
     </div>
@@ -126,9 +141,9 @@ export default {
     </div>
     
     <div class="button-div">
-      <button @click="uploadMusic" :disabled="isLoading">
+      <a @click="uploadMusic" :disabled="isLoading">
         {{ isLoading ? 'Загрузка...' : 'Загрузить запись' }}
-      </button>
+      </a>
     </div>
   </div>
 </template>
@@ -169,6 +184,7 @@ export default {
 .text-input-div {
     margin-top: 20px;
 }
+
 
 .music-load-div {
   width: 490px;
